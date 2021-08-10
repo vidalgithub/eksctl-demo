@@ -1,88 +1,131 @@
-# Source: https://gist.github.com/4ce7da8badbd0630f406cbd94fa573d2
+# Source: https://gist.github.com/681a5f4455428379e00bc815450e12d8
 
-###########################################################################################
-# Okteto                                                                                  #
-# How To Create Instant Development Infrastructure and Preview Environments In Kubernetes #
-# https://youtu.be/yjgHHUT-5-s                                                            #
-###########################################################################################
-
-# Referenced videos:
-# - Environments Based On Pull Requests (PRs): Using Argo CD To Apply GitOps Principles On Previews: https://youtu.be/cpAaI8p4R60
-# - Gitpod - Instant Development Environment Setup: https://youtu.be/QV1fYt-7SLU
+#############################################
+# eksctl                                    #
+# How to Create and Manage AWS EKS clusters #
+# https://youtu.be/pNECqaxyewQ              #
+#############################################
 
 #########
 # Setup #
 #########
 
-# Register (login) in https://okteto.com
+# Install the CLI from https://eksctl.io/introduction/#installation
 
-# Install the CLI from https://okteto.com/docs/getting-started/installation
+export AWS_ACCESS_KEY_ID=[...]
 
-#############################
-# Deploying Kubernetes apps #
-#############################
-
-# Open https://cloud.okteto.com/
-
-# Deploy https://github.com/vfarcic/okteto-demo
-
-##########################################
-# Interacting with the namespace locally #
-##########################################
-
-okteto login
+export AWS_SECRET_ACCESS_KEY=[...]
 
 export KUBECONFIG=$PWD/kubeconfig.yaml
 
-okteto namespace
+###############################
+# How NOT to create a cluster #
+###############################
 
-kubectl config view
+# Do NOT do this!
+# eksctl create cluster
 
-kubectl get all
+# Do NOT do this!
+# eksctl create cluster \
+#     --name devops-catalog \
+#     --region us-east-2 \
+#     --version 1.18 \
+#     --nodegroup-name primary \
+#     --node-type t2.small \
+#     --nodes-min 3 \
+#     --nodes-max 6 \
+#     --managed \
+#     --spot \
+#     --asg-access \
+#     --full-ecr-access
 
-kubectl get ingresses
+######################
+# Creating a cluster #
+######################
 
-kubectl describe deployment \
-    devops-toolkit
+git clone \
+    https://github.com/vfarcic/eksctl-demo.git
 
-###################################
-# Creating development containers #
-###################################
+cd eksctl-demo
 
-git clone https://github.com/vfarcic/okteto-demo
+cat cluster-1.17.yaml
 
-cd okteto-demo
+# Open https://eksctl.io/usage/schema/
 
-okteto up
+eksctl create cluster \
+    --config-file cluster-1.17.yaml
 
-cd src
+##########################
+# Exploring the outcomes #
+##########################
 
-ls -l
+# Open AWS Web Console and make sure that us-east-2 is selected
 
-ps aux
+eksctl get clusters --region us-east-2
 
-touch something
+kubectl get nodes
 
-exit
+###############################
+# How NOT to scale a cluster #
+###############################
 
-ls -1
+# Do NOT do this
+# eksctl scale nodegroup \
+#     --cluster devops-catalog \
+#     --nodes 4 \
+#     --name primary
 
-#####################
-# How does it work? #
-#####################
+# Cluster Autoscaler?
+# Open https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html
 
-cat Dockerfile
+###############################
+# Upgrading the control plane #
+###############################
 
-ls -1 helm
+diff cluster-1.17.yaml \
+    cluster-1.18.yaml
 
-cat okteto-pipeline.yml
+eksctl upgrade cluster \
+    --config-file cluster-1.18.yaml
 
-cat okteto.yml
+eksctl upgrade cluster \
+    --config-file cluster-1.18.yaml \
+    --approve
 
-#############################
-# Deploying from a terminal #
-#############################
+kubectl get nodes
 
-helm upgrade --install devops-toolkit helm --set ingress.enabled=false
+##########################
+# Upgrading worker nodes #
+##########################
 
-helm delete devops-toolkit
+eksctl create nodegroup \
+    --config-file cluster-1.18.yaml
+
+kubectl get nodes
+
+eksctl delete nodegroup \
+    --config-file cluster-1.18.yaml \
+    --only-missing
+
+eksctl delete nodegroup \
+    --config-file cluster-1.18.yaml \
+    --only-missing \
+    --approve
+
+kubectl get nodes
+
+#######################
+# What else is there? #
+#######################
+
+eksctl utils describe-addon-versions \
+    --cluster devops-catalog \
+    --region us-east-2
+
+##########################
+# Destroying the cluster #
+##########################
+
+eksctl delete cluster \
+    --config-file cluster-1.18.yaml \
+    --wait
