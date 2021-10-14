@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: ds-challenge-app
+    app: ds-challenge-app
+  name: ds-challenge-app
+spec:
+  ports:
+  - port: 9000
+    protocol: TCP
+    targetPort: 9000
+  selector:
+    run: ds-challenge-app
+  type: ClusterIP
+status:
+  loadBalancer: {}

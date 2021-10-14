@@ -1,0 +1,30 @@
+apiVersion: gateway.solo.io/v1
+kind: VirtualService
+metadata:
+  name: challenge
+  namespace: gloo-system
+spec:
+  displayName: warehouse
+  virtualHost:
+    domains:
+    - '*'
+    routes:
+    - matchers:
+      - prefix: /private
+      options:
+        prefixRewrite: /
+      routeAction:
+        single:
+          upstream:
+            name: default-ds-challenge-app-9000
+            namespace: gloo-system
+    - matchers:
+      - prefix: /public
+      options:
+        prefixRewrite: /
+      routeAction:
+        single:
+          upstream:
+            name: default-ds-challenge-app-9000
+            namespace: gloo-system
+

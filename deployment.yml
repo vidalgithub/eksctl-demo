@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  
+  labels:
+    run: ds-challenge-app
+  name: ds-challenge-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: ds-challenge-app
+  strategy: {}
+  template:
+    metadata:
+  
+      labels:
+        run: ds-challenge-app
+    spec:
+      containers:
+      - image: kemvoueric/dso-challenge 
+        name: ds-challenge-app
+        ports:
+        - containerPort: 9000
+        resources: {}
+status: {}
+
