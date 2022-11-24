@@ -29,7 +29,7 @@ export KUBECONFIG=$PWD/kubeconfig.yaml
 # eksctl create cluster \
 #     --name devops-catalog \
 #     --region us-east-2 \
-#     --version 1.18 \
+#     --version 1.22 \
 #     --nodegroup-name primary \
 #     --node-type t2.small \
 #     --nodes-min 3 \
@@ -48,7 +48,7 @@ git clone \
 
 cd eksctl-demo
 
-cat cluster-1.17.yaml
+cat cluster-1.22.yaml
 
 # Open https://eksctl.io/usage/schema/
 
